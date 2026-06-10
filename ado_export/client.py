@@ -8,6 +8,9 @@ from urllib.parse import urlparse, unquote
 import requests
 from requests.auth import HTTPBasicAuth
 
+# Azure DevOps REST API versions used by this client.
+# These are the latest stable preview versions for each endpoint as of mid-2024.
+# See: https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/
 API_WIQL = "7.1-preview.2"
 API_WORKITEMS = "7.1-preview.3"
 API_COMMENTS = "7.1-preview.4"

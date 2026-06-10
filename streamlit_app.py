@@ -8,6 +8,9 @@ import streamlit as st
 from ado_export.client import AzureDevOpsClient, parse_query_url
 from ado_export.excel_builder import build_excel
 
+# Brief pause between per-work-item API calls to avoid rate-limiting.
+_PER_ITEM_SLEEP_SECONDS = 0.05
+
 # ---------------------------------------------------------------------------
 # Page setup
 # ---------------------------------------------------------------------------
@@ -122,7 +125,7 @@ if submitted:
             st.warning(f"Could not fetch revisions for #{wid}: {exc}")
             revisions_map[wid] = []
 
-        time.sleep(0.05)
+        time.sleep(_PER_ITEM_SLEEP_SECONDS)
 
     progress_bar.empty()
 

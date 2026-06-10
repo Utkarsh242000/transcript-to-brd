@@ -115,7 +115,9 @@ def build_excel(
     custom_rows: list[dict] = []
 
     for wi in work_items:
-        wid: int = wi.get("id")  # type: ignore[assignment]
+        wid = wi.get("id")
+        if wid is None:
+            continue
         fields: dict = wi.get("fields", {})
         relations: list = wi.get("relations", [])
 
