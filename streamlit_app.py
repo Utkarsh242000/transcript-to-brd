@@ -15,10 +15,16 @@ from app.export.docx_exporter import DOCXExporter
 from app.ingestion.loader import TranscriptLoader
 from app.ingestion.normalizer import TextNormalizer
 from app.ingestion.parser import TranscriptParser
+from app.utils.logger import get_logger
 from app.utils.types import RequirementCategory, TextChunk
 
 SUPPORTED_UPLOAD_TYPES = ["txt", "vtt", "docx"]
 _DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+_MAX_EXECUTIVE_SUMMARY_CHARS = 700
+_MAX_EXECUTIVE_SUMMARY_UTTERANCES = 3
+_MAX_SECTION_ITEMS = 10
+_TIMESTAMP_FORMAT_UTC = "%Y%m%d%H%M%S"
+logger = get_logger(__name__)
 
 
 def _classify_text(text: str) -> RequirementCategory:
@@ -82,19 +88,30 @@ def convert_transcript_to_brd(upload_path: Path, output_dir: Path) -> tuple[byte
     if not chunks:
         raise ValueError("No relevant transcript statements were found for BRD generation.")
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime(_TIMESTAMP_FORMAT_UTC)
     document_id = f"BRD-{timestamp}"
     title = f"Business Requirement Document - {upload_path.stem}"
 
     brd = BRDComposer.compose(title=title, document_id=document_id, chunks=chunks)
-    brd.executive_summary = " ".join(u.text for u in normalized_utterances[:3])[:700]
-    brd.risks = [c.text for c in chunks if c.category == RequirementCategory.RISK][:10]
+    brd.executive_summary = " ".join(
+        u.text for u in normalized_utterances[:_MAX_EXECUTIVE_SUMMARY_UTTERANCES]
+    )[
+        :_MAX_EXECUTIVE_SUMMARY_CHARS
+    ]
+    brd.risks = [c.text for c in chunks if c.category == RequirementCategory.RISK][
+        :_MAX_SECTION_ITEMS
+    ]
     brd.acceptance_criteria = [
         c.text for c in chunks if c.category == RequirementCategory.ACCEPTANCE_CRITERIA
-    ][:10]
+    ][:_MAX_SECTION_ITEMS]
 
+    fallback_objective = (
+        normalized_utterances[0].text
+        if normalized_utterances
+        else "Requirements captured from uploaded transcript."
+    )
     if not brd.business_objectives:
-        brd.business_objectives = [normalized_utterances[0].text]
+        brd.business_objectives = [fallback_objective]
 
     output_dir.mkdir(parents=True, exist_ok=True)
     output_filename = f"{upload_path.stem}_brd.docx"
@@ -172,7 +189,8 @@ def main() -> None:
 
         except (ValueError, FileNotFoundError) as exc:
             st.error(f"Conversion failed: {exc}")
-        except Exception as exc:  # pragma: no cover - defensive UI handling
+        except Exception as exc:  # pragma: no cover - defensive error handling
+            logger.exception("Unexpected error during transcript conversion")
             st.error(f"Unexpected error during conversion: {exc}")
 
     if st.session_state.get("brd_bytes"):
