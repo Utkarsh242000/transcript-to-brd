@@ -83,36 +83,15 @@ transcript-to-brd/
 
 ---
 
-## Azure DevOps Query → Excel Exporter (Web App)
+## Transcript-to-BRD Streamlit Web App
 
-A Streamlit web app included in this repository that lets you:
+The repository includes a Streamlit app for the transcript-to-BRD flow with three actions:
 
-1. Paste an **Azure DevOps saved query URL**
-2. Enter your **Personal Access Token (PAT)** securely (masked input, never stored)
-3. Click **Fetch & Export** to pull all matching work items – including comments, revisions, and custom fields
-4. Click **Download Excel Workbook** to save the generated `.xlsx` file
+1. **Upload transcript** (`.txt`, `.vtt`, `.docx`)
+2. **Convert transcript to BRD**
+3. **Download BRD** as a generated `.docx` file
 
-### Workbook sheets
-
-| Sheet | Content |
-|-------|---------|
-| **WorkItems** | All standard fields for every work item |
-| **Comments** | Every comment for each work item |
-| **Revisions** | Full revision/history log per work item |
-| **CustomFields** | Any non-standard / organisation-specific fields |
-
-### Query URL format
-
-```
-https://dev.azure.com/{org}/{project}/_queries/query/{query_id}/
-```
-
-Open your saved query in the Azure DevOps web UI and copy the full URL from the address bar.
-
-### PAT permissions required
-
-Your PAT must have at least the **Work Items – Read** scope.  
-Go to *Azure DevOps → User Settings → Personal Access Tokens* to create one.
+The app reuses the existing pipeline modules under `app/` for loading, parsing, normalization, BRD composition, and DOCX export.
 
 ### Running the Streamlit app
 
