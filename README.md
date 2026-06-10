@@ -81,7 +81,64 @@ transcript-to-brd/
 └── .gitignore
 ```
 
-## Installation
+---
+
+## Azure DevOps Query → Excel Exporter (Web App)
+
+A Streamlit web app included in this repository that lets you:
+
+1. Paste an **Azure DevOps saved query URL**
+2. Enter your **Personal Access Token (PAT)** securely (masked input, never stored)
+3. Click **Fetch & Export** to pull all matching work items – including comments, revisions, and custom fields
+4. Click **Download Excel Workbook** to save the generated `.xlsx` file
+
+### Workbook sheets
+
+| Sheet | Content |
+|-------|---------|
+| **WorkItems** | All standard fields for every work item |
+| **Comments** | Every comment for each work item |
+| **Revisions** | Full revision/history log per work item |
+| **CustomFields** | Any non-standard / organisation-specific fields |
+
+### Query URL format
+
+```
+https://dev.azure.com/{org}/{project}/_queries/query/{query_id}/
+```
+
+Open your saved query in the Azure DevOps web UI and copy the full URL from the address bar.
+
+### PAT permissions required
+
+Your PAT must have at least the **Work Items – Read** scope.  
+Go to *Azure DevOps → User Settings → Personal Access Tokens* to create one.
+
+### Running the Streamlit app
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Utkarsh242000/transcript-to-brd.git
+cd transcript-to-brd
+
+# 2. Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Start the app
+streamlit run streamlit_app.py
+```
+
+The app opens automatically in your browser at `http://localhost:8501`.
+
+---
+
+## Transcript-to-BRD (Original Tool)
+
+### Installation
 
 ### Prerequisites
 - Python 3.9+
